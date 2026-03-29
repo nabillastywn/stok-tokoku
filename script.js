@@ -204,12 +204,21 @@ function logout() {
 }
 
 firebase.auth().onAuthStateChanged(function (user) {
+  const path = window.location.pathname;
+
   if (!user) {
-    if (
-      !window.location.pathname.includes("login.html") &&
-      !window.location.pathname.includes("register.html")
-    ) {
+    if (!path.includes("login.html") && !path.includes("register.html")) {
       window.location.href = "login.html";
+    }
+  } else if (!user.emailVerified) {
+    if (!path.includes("login.html")) {
+      alert("Silakan verifikasi email terlebih dahulu!");
+      auth.signOut();
+      window.location.href = "login.html";
+    }
+  } else {
+    if (path.includes("login.html") || path.includes("register.html")) {
+      window.location.href = "index.html";
     }
   }
 });
