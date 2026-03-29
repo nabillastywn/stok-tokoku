@@ -211,7 +211,7 @@ firebase.auth().onAuthStateChanged(function (user) {
       window.location.href = "login.html";
     }
   } else if (!user.emailVerified) {
-    if (!path.includes("login.html")) {
+    if (!path.includes("login.html") && !path.includes("register.html")) {
       alert("Silakan verifikasi email terlebih dahulu!");
       auth.signOut();
       window.location.href = "login.html";
