@@ -149,13 +149,22 @@ function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  firebase
-    .auth()
+  auth
     .createUserWithEmailAndPassword(email, password)
     .then((userCredential) => {
-      alert("Register berhasil!");
+      const user = userCredential.user;
 
-      window.location.href = "login.html";
+      user
+        .sendEmailVerification({
+          url: window.location.origin + "/login.html",
+        })
+        .then(() => {
+          alert("Register berhasil! Silakan cek email untuk verifikasi.");
+
+          auth.signOut();
+
+          window.location.href = "login.html";
+        });
     })
     .catch((error) => {
       alert(error.message);
@@ -168,13 +177,26 @@ function login() {
 
   auth
     .signInWithEmailAndPassword(email, password)
-    .then(() => {
-      alert("Login berhasil!");
+    .then((userCredential) => {
+      const user = userCredential.user;
 
+      if (!user.emailVerified) {
+        alert("Email belum diverifikasi! Silakan cek email kamu.");
+        auth.signOut();
+        return;
+      }
+
+      alert("Login berhasil!");
       window.location.href = "index.html";
     })
     .catch((error) => {
-      alert("Login gagal : " + error.message);
+      if (error.code === "auth/user-not-found") {
+        alert("Akun tidak ditemukan!");
+      } else if (error.code === "auth/wrong-password") {
+        alert("Password salah!");
+      } else {
+        alert(error.message);
+      }
     });
 }
 
@@ -185,12 +207,28 @@ function logout() {
 }
 
 firebase.auth().onAuthStateChanged(function (user) {
+  const path = window.location.pathname;
+
+  // ❌ Belum login
   if (!user) {
-    if (
-      !window.location.pathname.includes("login.html") &&
-      !window.location.pathname.includes("register.html")
-    ) {
+    if (!path.includes("login.html") && !path.includes("register.html")) {
       window.location.href = "login.html";
+    }
+  }
+
+  // ⚠️ Sudah login tapi belum verifikasi
+  else if (!user.emailVerified) {
+    if (!path.includes("login.html") && !path.includes("register.html")) {
+      alert("Silakan verifikasi email terlebih dahulu!");
+      auth.signOut();
+      window.location.href = "login.html";
+    }
+  }
+
+  // ✅ Sudah login & verified
+  else {
+    if (path.includes("login.html") || path.includes("register.html")) {
+      window.location.href = "index.html";
     }
   }
 });
