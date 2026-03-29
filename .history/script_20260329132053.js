@@ -154,14 +154,10 @@ function register() {
     .then((userCredential) => {
       const user = userCredential.user;
 
-      user
-        .sendEmailVerification({
-          url: window.location.origin + "/login.html",
-        })
-        .then(() => {
-          alert("Register berhasil! Silakan cek email untuk verifikasi.");
-          window.location.href = "login.html";
-        });
+      user.sendEmailVerification().then(() => {
+        alert("Register berhasil! Silakan cek email untuk verifikasi.");
+        window.location.href = "login.html";
+      });
     })
     .catch((error) => {
       alert(error.message);
