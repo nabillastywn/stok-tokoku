@@ -222,7 +222,7 @@ function logout() {
 firebase.auth().onAuthStateChanged(function (user) {
   const path = window.location.pathname;
 
-  if (path.includes("register.html")) {
+  if (path.includes("register")) {
     return;
   }
 
